@@ -1,34 +1,40 @@
-name: Loan Default CI/CD
+name: Loan Default CI/CD Gate
 
 on:
+  pull_request:
+    branches:
+      - main
+
   push:
     branches:
       - main
 
 jobs:
-
-  test-and-validate:
-
+  validate-and-test:
     runs-on: ubuntu-latest
 
     steps:
-
-      - name: Checkout code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.9"
 
-      - name: Install dependencies
+      - name: Install Dependencies
         run: |
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Validate data
+      - name: Validate Dataset
         run: |
           python validate_data.py
 
-      - name: Train and test model
+      - name: Train Model and Check Metrics
         run: |
           python train.py
+
+      - name: Build Docker Image
+        run: |
+          docker build -t loan-default-api .
